@@ -35,6 +35,11 @@ MONGO_URL, DB_NAME=fixjadi, CORS_ORIGINS=*, SESSION_SECRET, ADMIN_PIN=246810, DR
 - GOOGLE_DRIVE_API_KEY dipasang di backend/.env & backend restart. Key tervalidasi (Drive API enabled, key authenticated). Sinkron kini pakai jalur Drive API v3 (fallback scrape tetap ada).
 - Deploy readiness: PASS (deployment_agent).
 
+## Session 4 (2026-06) — Deploy fix
+- BUILD gagal karena `frontend/.env` tidak ada → dibuat `/app/frontend/.env` (REACT_APP_BACKEND_URL). Vite app pakai relative /api, nilai tak dipakai runtime.
+- Optimasi query (deployment_agent BLOCKER): clients.py cursor foto diberi `.limit(20000)`; admin.py `admin_reorder_photos` diubah dari loop update_one (N+1) ke satu `db.photos.bulk_write([UpdateOne...])` (+import pymongo UpdateOne), owned-ids query diberi limit.
+- deployment_agent re-scan: **PASS**, no blockers. Backend restart OK.
+
 ## Backlog / Next
 - P1: (Selesai) Google Drive API key terpasang.
 - P2: Guard the Drive poller to no-op when GOOGLE_DRIVE_API_KEY is empty (avoid benign warnings).

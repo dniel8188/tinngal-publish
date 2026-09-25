@@ -7,6 +7,7 @@ import os
 
 from fastapi import APIRouter, Cookie, Depends, File, HTTPException, Response, UploadFile
 from pydantic import BaseModel, Field
+from pymongo import UpdateOne
 
 from lib.db import db
 from lib.drive import DriveError, parse_folder_id
@@ -188,18 +189,22 @@ async def admin_reorder_photos(client_id: str, input: ReorderInput):
     if not doc:
         raise HTTPException(status_code=404, detail="Klien tidak ditemukan")
     owned = {
-        d["id"] async for d in db.photos.find({"client_id": client_id}, {"id": 1})
+        d["id"] async for d in db.photos.find({"client_id": client_id}, {"id": 1}).limit(20000)
     }
     unknown = [pid for pid in input.photo_ids if pid not in owned]
     if unknown:
         raise HTTPException(status_code=400, detail="Ada foto yang bukan milik klien ini")
-    for position, photo_id in enumerate(input.photo_ids):
-        await db.photos.update_one({"id": photo_id}, {"$set": {"position": position}})
+    ops = [
+        UpdateOne({"id": photo_id}, {"$set": {"position": position}})
+        for position, photo_id in enumerate(input.photo_ids)
+    ]
     # photos not named in the payload keep following the listed ones
-    for offset, photo_id in enumerate(sorted(owned - set(input.photo_ids))):
-        await db.photos.update_one(
-            {"id": photo_id}, {"$set": {"position": len(input.photo_ids) + offset}}
-        )
+    ops += [
+        UpdateOne({"id": photo_id}, {"$set": {"position": len(input.photo_ids) + offset}})
+        for offset, photo_id in enumerate(sorted(owned - set(input.photo_ids)))
+    ]
+    if ops:
+        await db.photos.bulk_write(ops)
     await db.clients.update_one({"id": client_id}, {"$set": {"custom_photo_order": True}})
     photos = await db.photos.find({"client_id": client_id}).sort([("position", 1)]).to_list(5000)
     return [to_photo_out(Photo(**p)) for p in photos]

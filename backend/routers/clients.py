@@ -49,7 +49,7 @@ async def list_clients():
     grouped: dict[str, list[Photo]] = {}
     async for d in db.photos.find(
         {}, {"client_id": 1, "url": 1, "drive_file_id": 1, "name": 1, "position": 1}
-    ).sort([("client_id", 1), ("position", 1)]):
+    ).sort([("client_id", 1), ("position", 1)]).limit(20000):
         p = Photo(**d)
         grouped.setdefault(p.client_id, []).append(p)
     return [
