@@ -1,0 +1,31 @@
+{
+  "summary": "Focused backend regression testing on the two functional changes since iteration_1: (a) GET /api/clients still returns all seeded galleries with correct cover + photo_count after adding .limit(20000) to the photos cursor, and (b) PUT /api/admin/clients/{id}/photos/order now uses bulk_write. Added /app/backend/tests/test_reorder_and_listing.py (7 cases) — all 7 PASSED. Verified: listing returns 7 clients, per-client photo_count matches detail; reorder requires admin (401), rejects foreign photo IDs (400), persists partial-payload ordering (head reversed exactly, unnamed photos trail behind), and PIN 200604 sets admin_session cookie while wrong PIN returns 401. Also re-ran the full pytest suite: 25 passed, 5 failed — the 5 failures are pre-existing tscheck_* files hardcoding an old PIN '1234' (unrelated to this iteration's changes).",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "tests/test_tscheck_*.py", "issue": "Pre-existing test files hardcode admin PIN '1234' and now fail against current ADMIN_PIN=200604 (5 tests). Not caused by current changes; recommend updating those tests to read ADMIN_PIN env or deleting them since /app/backend/tests/backend_test.py + new test_reorder_and_listing.py already cover the same surface."}
+    ]
+  },
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [
+    "/app/backend/tests/test_reorder_and_listing.py",
+    "/app/test_reports/pytest/reorder_results.xml",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "action_items": [
+    "(Optional) Update or delete the stale tscheck_* test files that hardcode PIN '1234' — they now fail with 401 against ADMIN_PIN=200604."
+  ],
+  "critical_code_review_comments": [
+    "admin_reorder_photos: bulk_write correctness verified — head order matches payload exactly, unnamed photos correctly trail (position = len(payload)+offset). Ownership check on 20k-limited async set-comprehension works as expected.",
+    "list_clients: async cursor with .limit(20000) still populates grouped dict correctly for all seeded clients (verified per-client count parity with detail endpoint).",
+    "Stale root-level /app/backend_test.py referenced in iteration_1 code review is still worth removing to avoid confusion."
+  ],
+  "updated_files": ["/app/backend/tests/test_reorder_and_listing.py"],
+  "success_rate": {"backend": "100% (7/7 focused tests; 25/25 in-scope tests)", "frontend": "skipped per request"},
+  "test_credentials": "Admin PIN 200604 (from /app/memory/test_credentials.md and backend/.env ADMIN_PIN)",
+  "seed_data_creation": "Used existing seeded clients. Reorder test picked first client with >=3 photos, permuted head, and restored original order after assertion (best-effort).",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "New focused suite: /app/backend/tests/test_reorder_and_listing.py. It reads ADMIN_PIN env (default 200604) and REACT_APP_BACKEND_URL. Run: `cd /app/backend && ADMIN_PIN=200604 pytest tests/test_reorder_and_listing.py -v`. The tscheck_*.py suite is stale (hardcoded PIN 1234) — its failures are not regressions.",
+  "rca of the issue": "N/A — all in-scope changes behave correctly."
+}

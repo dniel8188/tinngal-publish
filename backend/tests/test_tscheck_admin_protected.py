@@ -1,4 +1,6 @@
-"""Admin is protected by PIN 1234 (backend/.env ADMIN_PIN)."""
+"""Admin is protected by a PIN (backend/.env ADMIN_PIN)."""
+import os
+
 import httpx
 
 
@@ -12,7 +14,7 @@ def test_wrong_pin_rejected(client):
 
 
 def test_correct_pin_accepted(client):
-    resp = client.post("/admin/login", json={"pin": "1234"})
+    resp = client.post("/admin/login", json={"pin": os.environ.get("ADMIN_PIN", "1234")})
     assert resp.status_code == 200, resp.text
     assert resp.json().get("ok") is True
 

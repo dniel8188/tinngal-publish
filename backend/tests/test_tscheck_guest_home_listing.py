@@ -1,5 +1,6 @@
 """Guest home lists clients with no login: GET /clients returns fields required for
 name/date/venue/photo count display, and clicking through works via GET /clients/{id}."""
+import os
 import uuid
 
 import httpx
@@ -26,7 +27,7 @@ def test_public_clients_listing_has_required_fields():
 
 def test_public_listing_grows_with_new_client_no_auth_needed_to_view():
     admin = httpx.Client(base_url=BASE, timeout=30.0)
-    r = admin.post("/admin/login", json={"pin": "1234"})
+    r = admin.post("/admin/login", json={"pin": os.environ.get("ADMIN_PIN", "1234")})
     assert r.status_code == 200
 
     suffix = uuid.uuid4().hex[:8]

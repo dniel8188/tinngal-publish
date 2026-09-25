@@ -1,6 +1,7 @@
 """BUG FIX regression: a client linked to a real public Drive folder shows ALL photos
 (recursive subfolder walk + pagination), not just one. Also verifies manual re-sync
 keeps the full photo set."""
+import os
 import uuid
 
 import httpx
@@ -12,7 +13,7 @@ EXPECTED_COUNT = 22
 
 def _admin_client():
     c = httpx.Client(base_url=BASE, timeout=60.0)
-    r = c.post("/admin/login", json={"pin": "1234"})
+    r = c.post("/admin/login", json={"pin": os.environ.get("ADMIN_PIN", "1234")})
     assert r.status_code == 200, r.text
     return c
 

@@ -1,4 +1,5 @@
 """Admin CRUD: create a client, edit its name, delete it. Uses tscheck- prefixed fixture only."""
+import os
 import uuid
 
 import httpx
@@ -8,7 +9,7 @@ BASE = "http://localhost:8001/api"
 
 def _admin_client():
     c = httpx.Client(base_url=BASE, timeout=30.0)
-    r = c.post("/admin/login", json={"pin": "1234"})
+    r = c.post("/admin/login", json={"pin": os.environ.get("ADMIN_PIN", "1234")})
     assert r.status_code == 200, r.text
     return c
 
