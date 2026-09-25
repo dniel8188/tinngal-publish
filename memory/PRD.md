@@ -26,8 +26,13 @@ MONGO_URL, DB_NAME=fixjadi, CORS_ORIGINS=*, SESSION_SECRET, ADMIN_PIN=246810, DR
 - DB seeded: 6 clients / 162 photos.
 - ✅ Verified: backend 15/15 pytest pass; frontend Home/Gallery/Admin flows pass; admin login PIN 246810 works.
 
+## Session 2 (2026-06)
+- Admin PIN changed 246810 → **200604** (verified: new works, old 401). Updated in backend/.env + test_credentials.md.
+- Branding: user will self-manage via Admin → "Atur Tampilan Website" (no code change).
+- Google Drive: user has no key yet; provided step-by-step creation guide. GOOGLE_DRIVE_API_KEY still empty — will paste key later.
+
 ## Backlog / Next
-- P1: Add real Google Drive API key to enable live folder sync.
+- P1: Paste Google Drive API key into backend/.env when user provides it, then restart backend.
 - P2: Guard the Drive poller to no-op when GOOGLE_DRIVE_API_KEY is empty (avoid benign warnings).
 - P2: Delete stale root-level backend_test.py (superseded by backend/tests/backend_test.py).
 - P2: Deployment prep when user is ready.
