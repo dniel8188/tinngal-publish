@@ -31,8 +31,12 @@ MONGO_URL, DB_NAME=fixjadi, CORS_ORIGINS=*, SESSION_SECRET, ADMIN_PIN=246810, DR
 - Branding: user will self-manage via Admin → "Atur Tampilan Website" (no code change).
 - Google Drive: user has no key yet; provided step-by-step creation guide. GOOGLE_DRIVE_API_KEY still empty — will paste key later.
 
+## Session 3 (2026-06)
+- GOOGLE_DRIVE_API_KEY dipasang di backend/.env & backend restart. Key tervalidasi (Drive API enabled, key authenticated). Sinkron kini pakai jalur Drive API v3 (fallback scrape tetap ada).
+- Deploy readiness: PASS (deployment_agent).
+
 ## Backlog / Next
-- P1: Paste Google Drive API key into backend/.env when user provides it, then restart backend.
+- P1: (Selesai) Google Drive API key terpasang.
 - P2: Guard the Drive poller to no-op when GOOGLE_DRIVE_API_KEY is empty (avoid benign warnings).
 - P2: Delete stale root-level backend_test.py (superseded by backend/tests/backend_test.py).
 - P2: Deployment prep when user is ready.
